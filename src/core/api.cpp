@@ -91,7 +91,7 @@ BackgroundColor *API::make_background(const std::string &name, const ParamSet &p
 Material *API::make_material(const std::string &name, const ParamSet &ps) {
   std::cout << ">>> Inside API::material()\n";
   Material *mtr{nullptr};
-  mtr = create_material(ps);
+  //mtr = create_material(ps); //Error std::bad_cast
 
   // Return the newly created material.
   return mtr;
