@@ -272,7 +272,7 @@ void API::look_at(const ParamSet &ps) {
 
 void API::material(const ParamSet &ps) {
   std::cout << ">>> Inside API::material()\n";
-  VERIFY_SETUP_BLOCK("API::material");
+  VERIFY_WORLD_BLOCK("API::material");
 
   
   // retrieve type from ps.
@@ -284,7 +284,7 @@ void API::material(const ParamSet &ps) {
 
 void API::primitives(const ParamSet &ps) {
   std::cout << ">>> Inside API::primitives()\n";
-  VERIFY_SETUP_BLOCK("API::primitives");
+  VERIFY_WORLD_BLOCK("API::primitives");
 
   // retrieve type from ps.
   std::string type = retrieve(ps, "type", string{"unknown"});
