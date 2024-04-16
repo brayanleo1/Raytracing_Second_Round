@@ -15,7 +15,7 @@ class Primitive {
 		// It does not compute the hit point information.
 		virtual bool intersect_p( const Ray& r ) const = 0;
 		//virtual const Material * get_material(void) const = { return material; }
-		virtual const Material* get_material() const { return material.get(); }
+		virtual const Material * get_material(void) const = 0;
 	private:
 		std::shared_ptr<Material> material;
 };

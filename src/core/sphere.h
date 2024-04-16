@@ -7,8 +7,8 @@ namespace rt3
 {
 class Sphere : public Primitive {
     public: 
-        Sphere(const Point3f& center, float radius)
-            : center(center), radius(radius) {}
+        Sphere(const Point3f& center, float radius, std::shared_ptr<Material> material)
+            : center(center), radius(radius), material(material) {}
 
         ~Sphere(){}
         
@@ -23,7 +23,7 @@ class Sphere : public Primitive {
             
         bool intersect_p(const Ray& r) const override;
 
-        Sphere *create_sphere(const ParamSet &ps);
+        const Material * get_material(void) const override { return material.get(); }
 
 
     private:
@@ -31,7 +31,7 @@ class Sphere : public Primitive {
         float radius;
         std::shared_ptr<Material> material;
 };
-//Sphere *create_primitive(const ParamSet &ps, const std::shared_ptr<Material>& mtr);
+Sphere *create_primitive(const ParamSet &ps, const std::shared_ptr<Material>& mtr);
 
 }
 #endif  // SPHERE_H

@@ -52,14 +52,14 @@ struct RenderOptions {
   string material_type{ "flat" };
   ParamSet material_ps;
   // the Primitives
-  string primitives_type{ "sphere" };
-  ParamSet primitives_ps;
+  std::vector<string> primitives_type{ "sphere" };
+  std::vector<ParamSet> primitives_ps;
 
   //the integrator (For proj 4)
 
   //list of primitives (For the future, proj 3)
   using PrimVec = std::vector<std::shared_ptr<Primitive> >;
-  PrimVec primitives;
+  PrimVec primitives_list;
 };
 
 /// Collection of data related to a Graphics state, such as current material,
@@ -122,6 +122,7 @@ class API {
   static void primitives(const ParamSet& ps);
   static void world_begin();
   static void world_end();
+
 };
 }  // namespace rt3
 

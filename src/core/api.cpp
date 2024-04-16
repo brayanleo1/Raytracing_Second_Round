@@ -10,7 +10,7 @@
 
 namespace rt3 {
 
-void render(BackgroundColor backgroundb, const Camera *camera) {
+void render(BackgroundColor backgroundb, const Camera *camera, std::vector<std::shared_ptr<rt3::Primitive>> obj_list) {
   // Perform objects initialization here.
   // The Film object holds the memory for the image.
   // ...
@@ -19,15 +19,6 @@ void render(BackgroundColor backgroundb, const Camera *camera) {
   auto w = camera->film->get_resolution()[0];
   auto h = camera->film->get_resolution()[1];
 
-  // [4] Create spheres
-  auto s1 = Sphere({-1, 0.5, 5}, 0.4); // ps is the ParamSet with all information regarding a sphere.
-  auto s2 = Sphere({1, -0.5, 8}, 0.4);
-  auto s3 = Sphere({-1, -1.5, 3.5}, 0.4);
-  // [5] Add spheres to list of primitives.
-  std::vector< Sphere > obj_list;
-  obj_list.push_back( s1 );
-  obj_list.push_back( s2 );
-  obj_list.push_back( s3 );
 
   // Traverse all pixels to shoot rays from.
   for ( int j = 0 ; j < h ; j++ ) {
@@ -39,10 +30,13 @@ void render(BackgroundColor backgroundb, const Camera *camera) {
           if ( background.mapping_type == Background::mapping_t::screen )
             colorDef = background.sample( i/w, j/h ); // screen mapping needs a normalized pixel coord.
             // Traverse each object of the scene.
-          for ( const Primitive& p : obj_list) {
+          //bool test = true;
+          //bool test2 = true;
+          for ( const auto p : obj_list) {
             // Each time the ray hits something, max_t parameter of the ray must be updated.
-            if ( p.intersect_p( ray ) ) // Does the ray hit any sphere in the scene?
-              colorDef = red;  // Just paint it red.
+            if ( p.get()->intersect_p( ray ) ) // Does the ray hit any sphere in the scene?
+              colorDef = p.get()->get_material()->get_color();
+              
             }
           camera->film->add_sample( {i,j},  colorDef ); // set image buffer at position (i,j), accordingly.
 
@@ -80,7 +74,7 @@ Camera *API::make_camera(const std::string &name , const ParamSet &ps, const Par
 }
 
 BackgroundColor *API::make_background(const std::string &name, const ParamSet &ps) {
-  std::cout << ">>> Inside API::background()\n";
+  std::cout << ">>> Inside API::make_background()\n";
   BackgroundColor *bkg{nullptr};
   bkg = create_color_background(ps);
 
@@ -89,7 +83,7 @@ BackgroundColor *API::make_background(const std::string &name, const ParamSet &p
 }
 
 Material *API::make_material(const std::string &name, const ParamSet &ps) {
-  std::cout << ">>> Inside API::material()\n";
+  std::cout << ">>> Inside API::make_material()\n";
   Material *mtr{nullptr};
   //mtr = create_material(ps); //Error std::bad_cast
 
@@ -98,9 +92,9 @@ Material *API::make_material(const std::string &name, const ParamSet &ps) {
 }
 
 Primitive *API::make_primitive(const std::string &name, const ParamSet &ps, std::shared_ptr<Material>& mtr) {
-  std::cout << ">>> Inside API::primitive()\n";
+  std::cout << ">>> Inside API::make_primitive()\n";
   Primitive *pm{nullptr};
-  //pm = create_sphere(ps, mtr);
+  pm = create_primitive(ps, mtr);
 
   // Return the newly created primitive.
   return pm;
@@ -171,18 +165,15 @@ void API::world_end() {
   std::shared_ptr<Material> the_material{
       make_material(render_opt->material_type, render_opt->material_ps)};
 
-  std::shared_ptr<Material> flatRedMaterial = std::make_shared<Material>("Flat", red);
-  std::unique_ptr<Primitive> the_primitive{
-      make_primitive(render_opt->primitives_type, render_opt->primitives_ps, flatRedMaterial)};
 
-  /*
-  //Add primitive
-  std::unique_ptr<Primitive> the_primitive{
-      make_primitive(render_opt->primitives_type, render_opt->primitives_ps, the_material)};
-    */
-
-  //Add objects to the list
-  std::vector<std::shared_ptr<Primitive> > objects;
+  std::shared_ptr<Material> flatRedMaterial = std::make_shared<Material>("Flat", yeallow);
+  for(int i = 0; i < render_opt->primitives_ps.size(); i++)
+  {
+    std::shared_ptr<Primitive> the_primitives{
+    make_primitive(render_opt->primitives_type[i], render_opt->primitives_ps[i], flatRedMaterial)};
+    render_opt->primitives_list.push_back(the_primitives);
+  }
+  
 
   //Add film to the camera
   the_camera->add_film(the_film.get());
@@ -203,7 +194,7 @@ void API::world_end() {
 
     //================================================================================
     auto start = std::chrono::steady_clock::now();
-    render(*the_background, the_camera.get()); // TODO: This is the ray tracer's  main loop.
+    render(*the_background, the_camera.get(), render_opt->primitives_list); // TODO: This is the ray tracer's  main loop.
     auto end = std::chrono::steady_clock::now();
     //================================================================================
     auto diff = end - start; // Store the time difference between start and end
@@ -288,8 +279,16 @@ void API::primitives(const ParamSet &ps) {
 
   // retrieve type from ps.
   std::string type = retrieve(ps, "type", string{"unknown"});
-  render_opt->primitives_type = type;
-  render_opt->primitives_ps = ps;
+  render_opt->primitives_type.push_back(type);
+  render_opt->primitives_ps.push_back(ps);
+  //render_opt->primitives_type = type;
+  //render_opt->primitives_ps = ps;
+
+  std::cout << "primitive ps\n";
+  for(auto pp : ps)
+  {
+    std::cout << pp.first << " " << pp.second << std::endl;
+  }
 }
 
 } // namespace rt3
