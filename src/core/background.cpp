@@ -90,8 +90,5 @@ BackgroundColor::BackgroundColor(const std::vector<RGBAColor> &colors)
     corners[tr] = colors[0];
     corners[br] = colors[0];
   }
-  for(auto s : corners) {
-    cout<<"r:"<<std::to_string(s.r)<<" g:"<<std::to_string(s.g)<<" b:"<<std::to_string(s.b)<<"para um\n";
-  }
 }
 } // namespace rt3

@@ -30,7 +30,6 @@ Sphere *create_primitive(const ParamSet &ps, const std::shared_ptr<Material> &mt
   float radius = retrieve(ps, "radius", float(0.0));
   
   return new Sphere(center, radius, mtr);
-  return nullptr;
 }
 
 }

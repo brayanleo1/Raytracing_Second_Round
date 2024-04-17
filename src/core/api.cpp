@@ -85,7 +85,14 @@ BackgroundColor *API::make_background(const std::string &name, const ParamSet &p
 Material *API::make_material(const std::string &name, const ParamSet &ps) {
   std::cout << ">>> Inside API::make_material()\n";
   Material *mtr{nullptr};
-  //mtr = create_material(ps); //Error std::bad_cast
+
+  std::cout << "material ps\n";
+  for(auto pp : ps)
+  {
+    std::cout << pp.first << " " << pp.second << std::endl;
+  }
+
+  mtr = create_material(ps); //Error std::bad_cast
 
   // Return the newly created material.
   return mtr;
@@ -162,19 +169,21 @@ void API::world_end() {
       make_camera(render_opt->camera_type, render_opt->camera_ps, render_opt->look_at)};
 
   //Add material
-  std::shared_ptr<Material> the_material{
-      make_material(render_opt->material_type, render_opt->material_ps)};
-
+  for(int i = 0; i < render_opt->material_ps.size(); i++)
+  {
+    std::shared_ptr<Material> the_material{
+      make_material(render_opt->material_type[i], render_opt->material_ps[i])};
+    render_opt->materials_list.push_back(the_material);
+  }
 
   std::shared_ptr<Material> flatRedMaterial = std::make_shared<Material>("Flat", yeallow);
   for(int i = 0; i < render_opt->primitives_ps.size(); i++)
   {
     std::shared_ptr<Primitive> the_primitives{
-    make_primitive(render_opt->primitives_type[i], render_opt->primitives_ps[i], flatRedMaterial)};
+      make_primitive(render_opt->primitives_type[i], render_opt->primitives_ps[i], render_opt->materials_list[render_opt->material_index[i]])};
     render_opt->primitives_list.push_back(the_primitives);
   }
   
-
   //Add film to the camera
   the_camera->add_film(the_film.get());
 
@@ -268,8 +277,8 @@ void API::material(const ParamSet &ps) {
   
   // retrieve type from ps.
   std::string type = retrieve(ps, "type", string{"unknown"});
-  render_opt->material_type = type;
-  render_opt->material_ps = ps;
+  render_opt->material_type.push_back(type);
+  render_opt->material_ps.push_back(ps);
   
 }
 
@@ -281,14 +290,10 @@ void API::primitives(const ParamSet &ps) {
   std::string type = retrieve(ps, "type", string{"unknown"});
   render_opt->primitives_type.push_back(type);
   render_opt->primitives_ps.push_back(ps);
+  render_opt->material_index.push_back(render_opt->material_type.size()-2);
   //render_opt->primitives_type = type;
   //render_opt->primitives_ps = ps;
 
-  std::cout << "primitive ps\n";
-  for(auto pp : ps)
-  {
-    std::cout << pp.first << " " << pp.second << std::endl;
-  }
 }
 
 } // namespace rt3

@@ -49,17 +49,24 @@ struct RenderOptions {
   string bkg_type{ "solid" };  // "image", "interpolated"
   ParamSet bkg_ps;
   // the Material
-  string material_type{ "flat" };
-  ParamSet material_ps;
+  std::vector<string> material_type{ "flat" };
+  std::vector<ParamSet> material_ps;
   // the Primitives
   std::vector<string> primitives_type{ "sphere" };
   std::vector<ParamSet> primitives_ps;
 
   //the integrator (For proj 4)
 
-  //list of primitives (For the future, proj 3)
-  using PrimVec = std::vector<std::shared_ptr<Primitive> >;
+  //list of primitives
+  using PrimVec = std::vector<std::shared_ptr<Primitive>>;
   PrimVec primitives_list;
+
+  //Index of material for primitive
+  std::vector<int> material_index;
+
+  //list of materials
+  using MtrVec = std::vector<std::shared_ptr<Material>>;
+  MtrVec materials_list;
 };
 
 /// Collection of data related to a Graphics state, such as current material,
