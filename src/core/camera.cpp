@@ -16,7 +16,7 @@ namespace rt3 {
        Point3f e = look_from;
     
        auto a = film->get_resolution()[0]/film->get_resolution()[1];
-       auto h = tan(fovy/2);
+       auto h = tan(fovy*M_PI/360);
        auto t = h;
        auto b = -h;
        auto l = -a * h;
