@@ -15,11 +15,11 @@ public:
   Point3f origin() const { return o; }
   Vector3f direction() const { return d; }
   Point3f operator()(real_type t) const { return o + d * t; }
+  mutable real_type t_min, t_max; //!< parameters
 
 private:
   Point3f o;                      //!< origin
   Vector3f d;                     //!< direction
-  mutable real_type t_min, t_max; //!< parameters
 };
 } // namespace rt3
 

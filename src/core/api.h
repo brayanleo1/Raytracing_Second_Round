@@ -6,6 +6,8 @@
 #include "rt3.h"
 #include "paramset.h"
 #include "primitive.h"
+#include "integrator.h"
+#include "scene.h"
 
 //=== API Macro definitions
 
@@ -48,14 +50,15 @@ struct RenderOptions {
   /// the Background
   string bkg_type{ "solid" };  // "image", "interpolated"
   ParamSet bkg_ps;
+  // the Integrator
+  string igt_type{ "flat" };
+  ParamSet igt_ps;
   // the Material
   std::vector<string> material_type{ "flat" };
   std::vector<ParamSet> material_ps;
   // the Primitives
   std::vector<string> primitives_type{ "sphere" };
   std::vector<ParamSet> primitives_ps;
-
-  //the integrator (For proj 4)
 
   //list of primitives
   using PrimVec = std::vector<std::shared_ptr<Primitive>>;
@@ -113,6 +116,8 @@ class API {
   static Camera* make_camera(const string& name, const ParamSet& ps, const ParamSet& ps_lkat);
   static Material* make_material(const string& name, const ParamSet& ps);
   static Primitive* make_primitive(const std::string &name, const ParamSet &ps, std::shared_ptr<Material>& mtr);
+  static Integrator* make_integrator(const string& name, const ParamSet& ps, std::unique_ptr<Camera>& cam);
+  static Scene* make_scene(const std::vector<std::shared_ptr<Primitive>>& prims, std::unique_ptr<BackgroundColor>& bkg);
 
  public:
   //=== API function begins here.
@@ -125,8 +130,10 @@ class API {
   static void camera(const ParamSet& ps);
   static void look_at(const ParamSet& ps);
   static void background(const ParamSet& ps);
+  static void integrator(const ParamSet& ps);
   static void material(const ParamSet& ps);
   static void primitives(const ParamSet& ps);
+  //static void scene();
   static void world_begin();
   static void world_end();
 

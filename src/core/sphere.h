@@ -1,16 +1,16 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "primitive.h"
+#include "shape.h"
 
 namespace rt3
 {
-class Sphere : public Primitive {
+class Sphere : public Shape {
     public: 
-        Sphere(const Point3f& center, float radius, std::shared_ptr<Material> material)
-            : center(center), radius(radius), material(material) {}
-
         ~Sphere(){}
+
+        Sphere(const Point3f& center, float radius)
+            : center(center), radius(radius) {}
         
         /*
          * Implementation of the intersection between the ray and sphere
@@ -23,15 +23,13 @@ class Sphere : public Primitive {
             
         bool intersect_p(const Ray& r) const override;
 
-        const Material * get_material(void) const override { return material.get(); }
-
+        Bounds3f world_bounds() const {return Bounds3f();}
 
     private:
         Point3f center;
         float radius;
-        std::shared_ptr<Material> material;
 };
-Sphere *create_primitive(const ParamSet &ps, const std::shared_ptr<Material>& mtr);
+Sphere *create_sphere(const ParamSet &ps);
 
 }
 #endif  // SPHERE_H

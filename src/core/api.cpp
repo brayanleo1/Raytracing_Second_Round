@@ -1,9 +1,9 @@
 #include "api.h"
 #include "background.h"
 #include "camera.h"
-#include "primitive.h"
 #include "sphere.h"
 #include "material.h"
+#include "scene.h"
 
 #include <chrono>
 #include <memory>
@@ -35,8 +35,8 @@ void render(BackgroundColor backgroundb, const Camera *camera, std::vector<std::
           for ( const auto p : obj_list) {
             // Each time the ray hits something, max_t parameter of the ray must be updated.
             if ( p.get()->intersect_p( ray ) ) // Does the ray hit any sphere in the scene?
-              colorDef = p.get()->get_material()->get_color();
-              
+              colorDef = red;
+              //colorDef = p.get()->get_material().kd();
             }
           camera->film->add_sample( {i,j},  colorDef ); // set image buffer at position (i,j), accordingly.
 
@@ -86,12 +86,6 @@ Material *API::make_material(const std::string &name, const ParamSet &ps) {
   std::cout << ">>> Inside API::make_material()\n";
   Material *mtr{nullptr};
 
-  std::cout << "material ps\n";
-  for(auto pp : ps)
-  {
-    std::cout << pp.first << " " << pp.second << std::endl;
-  }
-
   mtr = create_material(ps); //Error std::bad_cast
 
   // Return the newly created material.
@@ -101,10 +95,35 @@ Material *API::make_material(const std::string &name, const ParamSet &ps) {
 Primitive *API::make_primitive(const std::string &name, const ParamSet &ps, std::shared_ptr<Material>& mtr) {
   std::cout << ">>> Inside API::make_primitive()\n";
   Primitive *pm{nullptr};
-  pm = create_primitive(ps, mtr);
+  pm = create_geometric_primitive(ps, mtr);//create_primitive(ps, mtr);
 
   // Return the newly created primitive.
   return pm;
+}
+
+Integrator *API::make_integrator(const std::string &name, const ParamSet &ps, std::unique_ptr<Camera>& cam) {
+  std::cout << ">>> Inside API::make_integrator()\n";
+  Integrator *igt{nullptr};
+  // Convert unique_ptr to shared_ptr
+  std::shared_ptr<Camera> shared_cam = std::move(cam);
+
+  igt = create_integrator(ps, shared_cam);
+  //igt = create_integrator(ps, cam);
+
+  // Return the newly created integrator.
+  return igt;
+}
+
+Scene *API::make_scene(const std::vector<std::shared_ptr<Primitive>> &prims, std::unique_ptr<BackgroundColor> &bkg) {
+  std::cout << ">>> Inside API::make_scene()\n";
+  Scene *scene{nullptr};
+  std::shared_ptr<BackgroundColor> shared_bkg = std::move(bkg);
+  //auto agg = create_primitive_aggregate(prims);
+  std::shared_ptr<PrimitiveAggregate> ag = std::shared_ptr<PrimitiveAggregate>(create_primitive_aggregate(prims));
+  scene = create_scene(ag, shared_bkg);
+
+  // Return the newly created scene.
+  return scene;
 }
 
 // ˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆ
@@ -168,27 +187,36 @@ void API::world_end() {
   std::unique_ptr<Camera> the_camera{
       make_camera(render_opt->camera_type, render_opt->camera_ps, render_opt->look_at)};
 
+  //Add film to the camera
+  std::cout << "Adding film to camera\n";
+  the_camera->add_film(the_film.get());
+  std::cout << "Film added to camera\n";
+
   //Add material
-  for(int i = 0; i < render_opt->material_ps.size(); i++)
+  for(long unsigned int i = 0; i < render_opt->material_ps.size(); i++)
   {
     std::shared_ptr<Material> the_material{
       make_material(render_opt->material_type[i], render_opt->material_ps[i])};
     render_opt->materials_list.push_back(the_material);
   }
 
-  std::shared_ptr<Material> flatRedMaterial = std::make_shared<Material>("Flat", yeallow);
-  for(int i = 0; i < render_opt->primitives_ps.size(); i++)
+  for(long unsigned int i = 0; i < render_opt->primitives_ps.size(); i++)
   {
     std::shared_ptr<Primitive> the_primitives{
       make_primitive(render_opt->primitives_type[i], render_opt->primitives_ps[i], render_opt->materials_list[render_opt->material_index[i]])};
     render_opt->primitives_list.push_back(the_primitives);
   }
   
-  //Add film to the camera
-  the_camera->add_film(the_film.get());
+  std::unique_ptr<Integrator> the_integrator{
+      make_integrator(render_opt->igt_type, render_opt->igt_ps, the_camera)};
+
+  std::unique_ptr<Scene> the_scene{
+      make_scene(render_opt->primitives_list, the_background)};
+
+  
 
   // Run only if we got film and background.
-  if (the_film && the_background) {
+  if (the_integrator && the_scene) {
     RT3_MESSAGE("    Parsing scene successfuly done!\n");
     RT3_MESSAGE("[2] Starting ray tracing progress.\n");
 
@@ -203,7 +231,8 @@ void API::world_end() {
 
     //================================================================================
     auto start = std::chrono::steady_clock::now();
-    render(*the_background, the_camera.get(), render_opt->primitives_list); // TODO: This is the ray tracer's  main loop.
+    //render(*the_background, the_camera.get(), render_opt->primitives_list); // TODO: This is the ray tracer's  main loop.
+    the_integrator->render(the_scene);
     auto end = std::chrono::steady_clock::now();
     //================================================================================
     auto diff = end - start; // Store the time difference between start and end
@@ -240,6 +269,17 @@ void API::background(const ParamSet &ps) {
   render_opt->bkg_type = type;
   // Store current background object.
   render_opt->bkg_ps = ps;
+}
+
+void API::integrator(const ParamSet &ps) {
+  std::cout << ">>> Inside API::integrator()\n";
+  VERIFY_SETUP_BLOCK("API::integrator");
+
+  // retrieve type from ps.
+  std::string type = retrieve(ps, "type", string{"unknown"});
+  render_opt->igt_type = type;
+  // Store current integrator object.
+  render_opt->igt_ps = ps;
 }
 
 void API::film(const ParamSet &ps) {
@@ -291,8 +331,6 @@ void API::primitives(const ParamSet &ps) {
   render_opt->primitives_type.push_back(type);
   render_opt->primitives_ps.push_back(ps);
   render_opt->material_index.push_back(render_opt->material_type.size()-2);
-  //render_opt->primitives_type = type;
-  //render_opt->primitives_ps = ps;
 
 }
 

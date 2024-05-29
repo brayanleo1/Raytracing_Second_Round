@@ -34,19 +34,27 @@ include_directories( cameras
 
 #=== SETTING VARIABLES ===#
 # Compiling flags
-set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -pedantic" )
+set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -fexceptions" )
 set( RT3_SOURCE_DIR "src" )
 
 #=== main  target ===
 add_executable(basic_rt3 ${RT3_SOURCE_DIR}/core/api.cpp
                          ${RT3_SOURCE_DIR}/core/background.cpp
+                         ${RT3_SOURCE_DIR}/core/camera.cpp
                          ${RT3_SOURCE_DIR}/core/error.cpp
                          ${RT3_SOURCE_DIR}/core/film.cpp
+                         ${RT3_SOURCE_DIR}/core/flatIntegrator.cpp
+                         ${RT3_SOURCE_DIR}/core/flatMaterial.cpp
+                         ${RT3_SOURCE_DIR}/core/geometric_primitive.cpp
                          ${RT3_SOURCE_DIR}/core/image_io.cpp
-                         ${RT3_SOURCE_DIR}/core/parser.cpp
-                         ${RT3_SOURCE_DIR}/core/camera.cpp
-                         ${RT3_SOURCE_DIR}/core/sphere.cpp
+                         ${RT3_SOURCE_DIR}/core/integrator.cpp
                          ${RT3_SOURCE_DIR}/core/material.cpp
+                         ${RT3_SOURCE_DIR}/core/parser.cpp
+                         ${RT3_SOURCE_DIR}/core/primitiveAggregate.cpp
+                         ${RT3_SOURCE_DIR}/core/scene.cpp
+                         ${RT3_SOURCE_DIR}/core/shape.cpp
+                         ${RT3_SOURCE_DIR}/core/sphere.cpp
+                         #${RT3_SOURCE_DIR}/core/triangle.cpp
                          ${RT3_SOURCE_DIR}/ext/lodepng.cpp
                          ${RT3_SOURCE_DIR}/ext/tinyxml2.cpp
                          ${RT3_SOURCE_DIR}/main/rt3.cpp
