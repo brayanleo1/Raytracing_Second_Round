@@ -6,34 +6,33 @@ namespace rt3 {
     void Camera::add_film(Film* f) {
     film = f;
     }
-
-    Ray PerspectiveCamera::generate_ray(int x, int y) const {
-
-       Vector3f gaze = look_at - look_from;
-       Vector3f w = gaze; w.make_unit_vector(); // left-hand orientation
-       Vector3f u = cross( vup, w ); u.make_unit_vector(); // The order inside cross matters. Can you guess why?
-       Vector3f v = cross( w, u ); v.make_unit_vector();
-       Point3f e = look_from;
     
-       auto a = film->get_resolution()[0]/film->get_resolution()[1];
-       auto h = tan(fovy*M_PI/360);
-       auto t = h;
-       auto b = -h;
-       auto l = -a * h;
-       auto r = a * h;
+    Ray PerspectiveCamera::generate_ray(int x, int y) const {
+        Vector3f gaze = look_at - look_from;
+        Vector3f w = gaze; w.make_unit_vector(); // left-hand orientation
+        Vector3f u = cross(vup, w); u.make_unit_vector(); // The order inside cross matters. Can you guess why?
+        Vector3f v = cross(u, w); v.make_unit_vector();
+        Point3f e = look_from;
 
-       auto un = l+(r-l)*(x+0.5)/film->get_resolution()[0] /*column*/;
-       auto vn = b+(t-b)*(y+0.5)/film->get_resolution()[1] /*row*/;
+        float aspect_ratio = static_cast<float>(film->get_resolution()[0]) / static_cast<float>(film->get_resolution()[1]);
+        float h = tan(fovy * M_PI / 360);
+        float t = h;
+        float b = -h;
+        float l = -aspect_ratio * h;
+        float r = aspect_ratio * h;
 
-       return Ray(e, w+un*u+vn*v);
+        float un = l + (r - l) * (x + 0.5) / film->get_resolution()[0];
+        float vn = b + (t - b) * (y + 0.5) / film->get_resolution()[1];
+
+        return Ray(e, w + un * u + vn * v);
     }
 
     Ray OrthographicCamera::generate_ray(int x, int y) const{
 
        Vector3f gaze = look_at - look_from;
        Vector3f w = gaze; w.make_unit_vector(); // left-hand orientation
-       Vector3f u = cross( vup, w ); u.make_unit_vector(); // The order inside cross matters. Can you guess why?
-       Vector3f v = cross( w, u ); v.make_unit_vector();
+       Vector3f u = cross(vup, w); u.make_unit_vector(); // The order inside cross matters. Can you guess why?
+       Vector3f v = cross(u, w); v.make_unit_vector();
        Point3f e = look_from;
        
        auto t = screen_window[3];

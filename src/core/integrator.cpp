@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "background.h"
 #include "flatIntegrator.h"
+#include "blinnPhongIntegrator.h"
 
 namespace rt3 {
     void SamplerIntegrator::render(const std::unique_ptr<Scene>& scene) {
@@ -23,7 +24,7 @@ namespace rt3 {
                 colorDef = scene.get()->background.get()->sample( i/w, j/h ); // screen mapping needs a normalized pixel coord.
                 
             auto temp_L =  Li( ray, scene );
-            if(temp_L.r != none.r || temp_L.g != none.g || temp_L.b != none.b || temp_L.a != none.a){
+            if(temp_L.hit){
                 colorDef = temp_L;
             }
             camera->film->add_sample( {i,j},  colorDef ); // set image buffer at position (i,j), accordingly.
@@ -39,7 +40,10 @@ namespace rt3 {
         std::cout << "Integrator type: " << type << std::endl;
         if (type == "flat") {
             return rt3::create_flat_integrator(cam);
-        } else {
+        } else if (type == "blinn_phong") {
+            return rt3::create_blinn_phong_integrator(ps,cam);
+        }
+        else {
             std::cerr << "Integrator type not recognized." << std::endl;
             return nullptr;
         }

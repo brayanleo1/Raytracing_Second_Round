@@ -11,8 +11,17 @@ bool Scene::intersect_p(const Ray& r) const {
     return aggregate->intersect_p(r);
 }
 
-Scene *create_scene(const std::shared_ptr<Primitive> &ag, const std::shared_ptr< Background > &bkg) {
-    return new Scene(ag, bkg);
+Scene *create_scene(const std::shared_ptr<Primitive> &ag, const std::shared_ptr< Background > &bkg, std::vector<std::shared_ptr<Light>> lts) {
+    return new Scene(ag, bkg, lts);
+}
+
+bool Scene::have_ambient_light() const {
+    for (const auto &light : lights) {
+        if (light.get()->is_ambient()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace rt3

@@ -23,7 +23,7 @@ class Sphere : public Shape {
             
         bool intersect_p(const Ray& r) const override;
 
-        Bounds3f world_bounds() const {return Bounds3f();}
+        Bounds3f world_bounds() const;
 
     private:
         Point3f center;

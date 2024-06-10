@@ -19,6 +19,7 @@ bool Sphere::intersect(const Ray& r, Surfel* sf) const {
       r.t_max = t;
       sf->p = r.origin() + t * r.direction();
       sf->n = (sf->p - center); // Unnormalized normal?
+      sf->n.make_unit_vector(); // Normalized normal
       sf->wo = -r.direction(); // Outgoing direction of light, which is -ray
       sf->uv = Point2f{0, 0}; // Set the parametric coordinate to (0, 0) for now
       sf->time = t; // Set the time of the hit to t
@@ -47,6 +48,13 @@ bool Sphere::intersect_p(const Ray& r) const {
       }
     return false;
   }
+}
+
+Bounds3f Sphere::world_bounds() const {
+  // Implement the bounding box of the sphere
+  // Return the bounding box
+  Point3f radius3 = Point3f{radius, radius, radius};
+  return Bounds3f{center - radius3, center + radius3};
 }
 
 

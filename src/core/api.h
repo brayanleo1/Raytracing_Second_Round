@@ -59,6 +59,9 @@ struct RenderOptions {
   // the Primitives
   std::vector<string> primitives_type{ "sphere" };
   std::vector<ParamSet> primitives_ps;
+  // the light source
+  std::vector<string> light_type{ "point" };
+  std::vector<ParamSet> light_ps;
 
   //list of primitives
   using PrimVec = std::vector<std::shared_ptr<Primitive>>;
@@ -70,6 +73,13 @@ struct RenderOptions {
   //list of materials
   using MtrVec = std::vector<std::shared_ptr<Material>>;
   MtrVec materials_list;
+
+  //list of named materials
+  std::vector<std::pair<std::string, ParamSet>> named_materials;
+
+  //List of lights
+  using LightVec = std::vector<std::shared_ptr<Light>>;
+  LightVec lights_list;
 };
 
 /// Collection of data related to a Graphics state, such as current material,
@@ -117,7 +127,8 @@ class API {
   static Material* make_material(const string& name, const ParamSet& ps);
   static Primitive* make_primitive(const std::string &name, const ParamSet &ps, std::shared_ptr<Material>& mtr);
   static Integrator* make_integrator(const string& name, const ParamSet& ps, std::unique_ptr<Camera>& cam);
-  static Scene* make_scene(const std::vector<std::shared_ptr<Primitive>>& prims, std::unique_ptr<BackgroundColor>& bkg);
+  static Scene* make_scene(const std::vector<std::shared_ptr<Primitive>>& prims, std::unique_ptr<BackgroundColor>& bkg, std::vector<std::shared_ptr<Light>>& lts);
+  static Light* make_light(const string& name, const ParamSet& ps);
 
  public:
   //=== API function begins here.
@@ -132,7 +143,10 @@ class API {
   static void background(const ParamSet& ps);
   static void integrator(const ParamSet& ps);
   static void material(const ParamSet& ps);
+  static void make_named_material(const ParamSet& ps);
+  static void named_material(const ParamSet& ps);
   static void primitives(const ParamSet& ps);
+  static void light_source(const ParamSet& ps);
   //static void scene();
   static void world_begin();
   static void world_end();

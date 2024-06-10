@@ -10,42 +10,6 @@
 
 namespace rt3 {
 
-void render(BackgroundColor backgroundb, const Camera *camera, std::vector<std::shared_ptr<rt3::Primitive>> obj_list) {
-  // Perform objects initialization here.
-  // The Film object holds the memory for the image.
-  // ...
-
-  auto background = backgroundb;
-  auto w = camera->film->get_resolution()[0];
-  auto h = camera->film->get_resolution()[1];
-
-
-  // Traverse all pixels to shoot rays from.
-  for ( int j = 0 ; j < h ; j++ ) {
-      for( int i = 0 ; i < w ; i++ ) {
-          Ray ray = camera->generate_ray( i, j );
-          // Not shooting rays just yet; so let us sample the background.
-          auto colorDef = background.sample( float(i)/float(w), float(j)/float(h) );
-          // Get the backgound color in case the ray hits nothing.
-          if ( background.mapping_type == Background::mapping_t::screen )
-            colorDef = background.sample( i/w, j/h ); // screen mapping needs a normalized pixel coord.
-            // Traverse each object of the scene.
-          //bool test = true;
-          //bool test2 = true;
-          for ( const auto p : obj_list) {
-            // Each time the ray hits something, max_t parameter of the ray must be updated.
-            if ( p.get()->intersect_p( ray ) ) // Does the ray hit any sphere in the scene?
-              colorDef = red;
-              //colorDef = p.get()->get_material().kd();
-            }
-          camera->film->add_sample( {i,j},  colorDef ); // set image buffer at position (i,j), accordingly.
-
-      }
-  }
-  // send image color buffer to the output file.
-  camera->film->write_image();
-}
-
 //=== API's static members declaration and initialization.
 API::APIState API::curr_state = APIState::Uninitialized;
 RunningOptions API::curr_run_opt;
@@ -86,7 +50,7 @@ Material *API::make_material(const std::string &name, const ParamSet &ps) {
   std::cout << ">>> Inside API::make_material()\n";
   Material *mtr{nullptr};
 
-  mtr = create_material(ps); //Error std::bad_cast
+  mtr = create_material(ps);
 
   // Return the newly created material.
   return mtr;
@@ -114,16 +78,25 @@ Integrator *API::make_integrator(const std::string &name, const ParamSet &ps, st
   return igt;
 }
 
-Scene *API::make_scene(const std::vector<std::shared_ptr<Primitive>> &prims, std::unique_ptr<BackgroundColor> &bkg) {
+Scene *API::make_scene(const std::vector<std::shared_ptr<Primitive>> &prims, std::unique_ptr<BackgroundColor> &bkg, std::vector<std::shared_ptr<Light>> &lts) {
   std::cout << ">>> Inside API::make_scene()\n";
   Scene *scene{nullptr};
   std::shared_ptr<BackgroundColor> shared_bkg = std::move(bkg);
   //auto agg = create_primitive_aggregate(prims);
   std::shared_ptr<PrimitiveAggregate> ag = std::shared_ptr<PrimitiveAggregate>(create_primitive_aggregate(prims));
-  scene = create_scene(ag, shared_bkg);
+  scene = create_scene(ag, shared_bkg, lts);
 
   // Return the newly created scene.
   return scene;
+}
+
+Light *API::make_light(const std::string &name, const ParamSet &ps) {
+  std::cout << ">>> Inside API::make_light()\n";
+  Light *light{nullptr};
+  light = create_light(ps);
+
+  // Return the newly created light.
+  return light;
 }
 
 // ˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆˆ
@@ -206,12 +179,19 @@ void API::world_end() {
       make_primitive(render_opt->primitives_type[i], render_opt->primitives_ps[i], render_opt->materials_list[render_opt->material_index[i]])};
     render_opt->primitives_list.push_back(the_primitives);
   }
+
+  for(long unsigned int i = 0; i < render_opt->light_ps.size(); i++)
+  {
+    std::shared_ptr<Light> the_light{
+      make_light(render_opt->light_type[i], render_opt->light_ps[i])};
+    render_opt->lights_list.push_back(the_light);
+  }
   
   std::unique_ptr<Integrator> the_integrator{
       make_integrator(render_opt->igt_type, render_opt->igt_ps, the_camera)};
 
   std::unique_ptr<Scene> the_scene{
-      make_scene(render_opt->primitives_list, the_background)};
+      make_scene(render_opt->primitives_list, the_background, render_opt->lights_list)};
 
   
 
@@ -322,6 +302,31 @@ void API::material(const ParamSet &ps) {
   
 }
 
+void API::make_named_material(const ParamSet &ps) {
+  std::cout << ">>> Inside API::make_named_material()\n";
+  VERIFY_WORLD_BLOCK("API::make_named_material");
+
+  // retrieve type from ps.
+  std::string type = retrieve(ps, "type", string{"unknown"});
+  // I need to create and store in the named_materials map.
+  render_opt->named_materials.push_back(std::pair<string, ParamSet>(retrieve(ps, "name", string{"unknown"}), ps));
+}
+
+void API::named_material(const ParamSet &ps) {
+  std::cout << ">>> Inside API::named_material()\n";
+  VERIFY_WORLD_BLOCK("API::named_material");
+
+  // retrieve name from ps.
+  std::string name = retrieve(ps, "name", string{"unknown"});
+  // I need to get the name and push on material_type and material_ps
+  render_opt->material_type.push_back(name);
+  render_opt->material_ps.push_back(render_opt->named_materials[ //Need to find the index based on the name
+    std::find_if(render_opt->named_materials.begin(), render_opt->named_materials.end(),
+      [name](const std::pair<string, ParamSet>& element) { return element.first == name; }
+    ) - render_opt->named_materials.begin()
+    ].second);
+}
+
 void API::primitives(const ParamSet &ps) {
   std::cout << ">>> Inside API::primitives()\n";
   VERIFY_WORLD_BLOCK("API::primitives");
@@ -332,6 +337,16 @@ void API::primitives(const ParamSet &ps) {
   render_opt->primitives_ps.push_back(ps);
   render_opt->material_index.push_back(render_opt->material_type.size()-2);
 
+}
+
+void API::light_source(const ParamSet &ps) {
+  std::cout << ">>> Inside API::light_source()\n";
+  VERIFY_WORLD_BLOCK("API::light_source");
+
+  // retrieve type from ps.
+  std::string type = retrieve(ps, "type", string{"unknown"});
+  render_opt->light_type.push_back(type);
+  render_opt->light_ps.push_back(ps);
 }
 
 } // namespace rt3

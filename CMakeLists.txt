@@ -40,6 +40,8 @@ set( RT3_SOURCE_DIR "src" )
 #=== main  target ===
 add_executable(basic_rt3 ${RT3_SOURCE_DIR}/core/api.cpp
                          ${RT3_SOURCE_DIR}/core/background.cpp
+                         ${RT3_SOURCE_DIR}/core/blinnPhongIntegrator.cpp
+                         ${RT3_SOURCE_DIR}/core/blinnPhongMaterial.cpp
                          ${RT3_SOURCE_DIR}/core/camera.cpp
                          ${RT3_SOURCE_DIR}/core/error.cpp
                          ${RT3_SOURCE_DIR}/core/film.cpp
@@ -48,8 +50,10 @@ add_executable(basic_rt3 ${RT3_SOURCE_DIR}/core/api.cpp
                          ${RT3_SOURCE_DIR}/core/geometric_primitive.cpp
                          ${RT3_SOURCE_DIR}/core/image_io.cpp
                          ${RT3_SOURCE_DIR}/core/integrator.cpp
+                         ${RT3_SOURCE_DIR}/core/light.cpp
                          ${RT3_SOURCE_DIR}/core/material.cpp
                          ${RT3_SOURCE_DIR}/core/parser.cpp
+                         ${RT3_SOURCE_DIR}/core/pointLight.cpp
                          ${RT3_SOURCE_DIR}/core/primitiveAggregate.cpp
                          ${RT3_SOURCE_DIR}/core/scene.cpp
                          ${RT3_SOURCE_DIR}/core/shape.cpp

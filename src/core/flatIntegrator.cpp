@@ -13,11 +13,13 @@ RGBAColor FlatIntegrator::Li(const Ray &ray, const std::unique_ptr<Scene>& scene
     if (!scene.get()->intersect(ray, &isect)) {
         return L; // empty object.
     }
+
     // Some form of determining the incoming radiance at the ray's origin.
     // Polymorphism in action.
     const FlatMaterial *fm = dynamic_cast<const FlatMaterial *>(isect.primitive->get_material().get());
     // Assign diffuse color to L.
     L = fm->kd(); // Call a method present only in FlatMaterial.
+    L.hit = true;
     return L;
 }
 

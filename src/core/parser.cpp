@@ -112,7 +112,8 @@ namespace rt3
             {param_type_e::REAL, "zmin"},
             {param_type_e::REAL, "zmax"},
             {param_type_e::COLOR, "near_color"},
-            {param_type_e::COLOR, "far_color"}
+            {param_type_e::COLOR, "far_color"},
+            {param_type_e::INT, "depth"}
         };
         parse_parameters(p_element, param_list, /*out */ &ps);
 
@@ -167,10 +168,35 @@ namespace rt3
         ParamSet ps;
         vector<std::pair<param_type_e, string>> param_list{
             {param_type_e::STRING, "type"},
-            {param_type_e::POINT3F, "color"}};
+            {param_type_e::POINT3F, "color"},
+            {param_type_e::POINT3F, "ambient"},
+            {param_type_e::POINT3F, "diffuse"},
+            {param_type_e::POINT3F, "specular"},
+            {param_type_e::POINT3F, "mirror"},
+            {param_type_e::REAL, "glossiness"}};
 
         parse_parameters(p_element, param_list, /* out */ &ps);
         API::material(ps);
+      } else if (tag_name == "make_named_material") {
+        ParamSet ps;
+        vector<std::pair<param_type_e, string>> param_list{
+            {param_type_e::STRING, "name"},
+            {param_type_e::STRING, "type"},
+            {param_type_e::POINT3F, "color"},
+            {param_type_e::POINT3F, "ambient"},
+            {param_type_e::POINT3F, "diffuse"},
+            {param_type_e::POINT3F, "specular"},
+            {param_type_e::POINT3F, "mirror"},
+            {param_type_e::REAL, "glossiness"}};
+        parse_parameters(p_element, param_list, /* out */ &ps);
+        API::make_named_material(ps);
+      } else if (tag_name == "named_material") {
+        ParamSet ps;
+        vector<std::pair<param_type_e, string>> param_list{
+            {param_type_e::STRING, "name"}};
+        
+        parse_parameters(p_element, param_list, /* out */ &ps);
+        API::named_material(ps);
       } else if (tag_name == "object")
       {
         ParamSet ps;
@@ -181,6 +207,33 @@ namespace rt3
 
         parse_parameters(p_element, param_list, /* out */ &ps);
         API::primitives(ps);
+      } else if (tag_name == "light_source")
+      {
+        ParamSet ps;
+        vector<std::pair<param_type_e, string>> param_list{
+            {param_type_e::STRING, "type"},
+            {param_type_e::POINT3F, "from"},
+            {param_type_e::COLOR, "I"},
+            {param_type_e::POINT3F, "to"},
+            {param_type_e::POINT3F, "scale"},
+            {param_type_e::REAL, "cutoff"},
+            {param_type_e::REAL, "falloff"}};
+
+        parse_parameters(p_element, param_list, /* out */ &ps);
+        API::light_source(ps);
+      }
+      else if (tag_name == "include")
+      {
+        const char *filename;
+        p_element->QueryStringAttribute("filename", &filename);
+        if (filename)
+        {
+          parse(filename);
+        }
+      }
+      else if (tag_name == "render_again") {
+        API::world_begin();
+        API::world_end();
       }
       else if (tag_name == "world_begin")
       {

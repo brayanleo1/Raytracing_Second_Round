@@ -2,6 +2,10 @@
 #define COMMONS_H
 
 #include <cstdint>
+#include "math.h"
+
+namespace rt3 {
+
 
 struct RGBAColor
 {
@@ -9,9 +13,14 @@ struct RGBAColor
 	unsigned char g;
 	unsigned char b;
 	unsigned char a;
+	bool hit = false;
+	
 };
 
-struct Bounds3f {
+struct Bounds3f { // if it is a bounding box, it should be a box, not a sphere
+	//so it should have 2 points, min and max
+	Point3f pMin = {INFINITY, INFINITY, INFINITY};
+	Point3f pMax = {-INFINITY, -INFINITY, -INFINITY};
   // ... (members to store bounding box data)
 };
 
@@ -22,5 +31,48 @@ constexpr RGBAColor yeallow{255,255,0,255};
 constexpr RGBAColor white{255,255,255,255};
 constexpr RGBAColor black{0,0,0,255};
 constexpr RGBAColor none{0,0,0,0};
+
+
+
+inline RGBAColor operator*(float t, const RGBAColor &v)
+{	
+    return RGBAColor{ static_cast<unsigned char>(t * v.r), static_cast<unsigned char>(t * v.g), static_cast<unsigned char>(t * v.b), v.a};
+}
+
+inline RGBAColor operator*(const RGBAColor &v, float t)
+{
+	return t * v;
+}
+
+inline RGBAColor operator*(const RGBAColor &v1, const Spectrum &s) {
+	return RGBAColor{ static_cast<unsigned char>(v1.r * s.r(), static_cast<unsigned char>(v1.g * s.g(), static_cast<unsigned char>(v1.b * s.b()), v1.a))};
+}
+
+inline RGBAColor operator*(const Spectrum &s, const RGBAColor &v1) {
+	return v1 * s;
+}
+
+inline RGBAColor operator+(const RGBAColor &v1, const RGBAColor &v2)
+{
+	return RGBAColor{ static_cast<unsigned char>(v1.r + v2.r), static_cast<unsigned char>(v1.g + v2.g), static_cast<unsigned char>(v1.b + v2.b), v1.a};
+}
+
+inline RGBAColor operator+=(RGBAColor &v1, const RGBAColor &v2)
+{
+	v1.r += v2.r;
+	v1.g += v2.g;
+	v1.b += v2.b;
+	return v1;
+}
+
+inline RGBAColor operator+=(RGBAColor &v1, const Spectrum &s)
+{
+	v1.r += s.r()*255;
+	v1.g += s.g()*255;
+	v1.b += s.b()*255;
+	return v1;
+}
+
+} // namespace rt3
 
 #endif

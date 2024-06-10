@@ -24,7 +24,7 @@ class Primitive {
 class GeometricPrimitive : public Primitive {
 	public:
 		GeometricPrimitive(std::shared_ptr<Shape> shape, std::shared_ptr<Material> material): shape{shape}, material{material} {}
-		Bounds3f world_bounds() const override {return Bounds3f();}
+		Bounds3f world_bounds() const override {return shape.get()->world_bounds();}
 		bool intersect ( const Ray& r, Surfel *sf ) const override {bool hit = shape.get()->intersect(r, sf);
 		if(hit) {sf->primitive = this;} return hit;}
 		bool intersect_p ( const Ray& r) const override {return shape.get()->intersect_p(r);}
@@ -37,23 +37,12 @@ class GeometricPrimitive : public Primitive {
 class PrimitiveAggregate : public Primitive {
 	public:
 		PrimitiveAggregate(std::vector<std::shared_ptr<Primitive>> primitives): primitives{primitives} {}
-		Bounds3f world_bounds() const override {return Bounds3f();}
-		bool intersect ( const Ray& r, Surfel *sf ) const override {
-			bool hit = false;
-			for (const auto &primitive : primitives) {
-				hit |= primitive.get()->intersect(r, sf);
-			}
-			/*For test*/ //std::cout << "hitted this color " << sf->primitive->get_material().get() << "\n";
-			return hit;
-		}
-		bool intersect_p ( const Ray& r) const override {
-			for (const auto &primitive : primitives) {
-				if (primitive.get()->intersect_p(r)) {
-					return true;
-				}
-			}
-			return false;
-		}
+		Bounds3f world_bounds() const override;
+		Bounds3f union_bounds(const Bounds3f &b1, const Bounds3f &b2) const;
+		Point3f min(const Point3f &p1, const Point3f &p2) const;
+		Point3f max(const Point3f &p1, const Point3f &p2) const;
+		bool intersect ( const Ray& r, Surfel *sf ) const override;
+		bool intersect_p ( const Ray& r) const override;
 		const std::shared_ptr<Material> get_material(void) const override {return nullptr;}
 	private:
 		std::vector<std::shared_ptr<Primitive>> primitives;
