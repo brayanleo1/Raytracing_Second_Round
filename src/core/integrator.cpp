@@ -8,14 +8,17 @@ namespace rt3 {
     void SamplerIntegrator::render(const std::unique_ptr<Scene>& scene) {
     // Always call the preprocess() before doing any rendering.
     // This might be just an empty method, or not, depending on the integrator's needs.
-    //preprocess(scene);
+    preprocess(*scene);
     std::cout << "Rendering scene, the start" << std::endl;
     auto w = camera->film->get_resolution()[0];
     auto h = camera->film->get_resolution()[1];
 
+    // Loading bar for the rendering process.
+    std::cout << "initializing rendering main loop" << std::endl;
 
     // Traverse all pixels to shoot rays from.
     for ( int j = 0 ; j < h ; j++ ) {
+        std::cout << "Rendering line " << j+1 << " of " << h << std::endl;
         for( int i = 0 ; i < w ; i++ ) {
             Ray ray = camera->generate_ray( i, j );
             auto colorDef = scene.get()->background.get()->sample( float(i)/float(w), float(j)/float(h) );

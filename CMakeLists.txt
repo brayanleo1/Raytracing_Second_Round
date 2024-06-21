@@ -38,11 +38,13 @@ set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -fexceptions" 
 set( RT3_SOURCE_DIR "src" )
 
 #=== main  target ===
-add_executable(basic_rt3 ${RT3_SOURCE_DIR}/core/api.cpp
+add_executable(basic_rt3 ${RT3_SOURCE_DIR}/core/ambientLight.cpp
+                         ${RT3_SOURCE_DIR}/core/api.cpp
                          ${RT3_SOURCE_DIR}/core/background.cpp
                          ${RT3_SOURCE_DIR}/core/blinnPhongIntegrator.cpp
                          ${RT3_SOURCE_DIR}/core/blinnPhongMaterial.cpp
                          ${RT3_SOURCE_DIR}/core/camera.cpp
+                         ${RT3_SOURCE_DIR}/core/directionalLight.cpp
                          ${RT3_SOURCE_DIR}/core/error.cpp
                          ${RT3_SOURCE_DIR}/core/film.cpp
                          ${RT3_SOURCE_DIR}/core/flatIntegrator.cpp
@@ -58,6 +60,7 @@ add_executable(basic_rt3 ${RT3_SOURCE_DIR}/core/api.cpp
                          ${RT3_SOURCE_DIR}/core/scene.cpp
                          ${RT3_SOURCE_DIR}/core/shape.cpp
                          ${RT3_SOURCE_DIR}/core/sphere.cpp
+                         ${RT3_SOURCE_DIR}/core/spotLight.cpp
                          #${RT3_SOURCE_DIR}/core/triangle.cpp
                          ${RT3_SOURCE_DIR}/ext/lodepng.cpp
                          ${RT3_SOURCE_DIR}/ext/tinyxml2.cpp

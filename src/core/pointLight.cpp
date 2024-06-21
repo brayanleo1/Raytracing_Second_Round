@@ -6,7 +6,7 @@ namespace rt3 {
 Spectrum PointLight::sample_Li( const Surfel& hit, Vector3f* wi, VisibilityTester* vis ) {
     *wi = (position - hit.p);
     wi->make_unit_vector();
-    *vis = VisibilityTester( hit, Surfel{position, Vector3f{0,0,0}, *wi, wi->length(), Point2f{0,0}, nullptr} );
+    *vis = VisibilityTester( hit, Surfel{position, Vector3f{0,0,0}, *wi, 0, Point2f{0,0}, nullptr} );
     return intensity;
 }
 

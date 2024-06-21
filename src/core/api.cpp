@@ -146,14 +146,10 @@ void API::world_begin() {
 
 void API::world_end() {
   VERIFY_WORLD_BLOCK("API::world_end");
-  // The scene has been properly set up and the scene has
-  // already been parsed. It's time to render the scene.
-
-  // At this point, we have the background as a solitary pointer here.
-  // In the future, the background will be parte of the scene object.
+  
   std::unique_ptr<BackgroundColor> the_background{
       make_background(render_opt->bkg_type, render_opt->bkg_ps)};
-  // Same with the film, that later on will belong to a camera object.
+
   std::unique_ptr<Film> the_film{
       make_film(render_opt->film_type, render_opt->film_ps)};
 

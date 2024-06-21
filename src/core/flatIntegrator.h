@@ -9,9 +9,7 @@ public:
     FlatIntegrator( std::shared_ptr<Camera> cam ) : SamplerIntegrator{cam} {};
 
     RGBAColor Li(const Ray& ray, const std::unique_ptr<Scene>& scene) const override;
-    /*void preprocess(conststd::unique_ptr<Scene>& scene) {
-        // Empty for now.
-    };*/
+    void preprocess(const Scene &scene) const override {};
 
     void add_camera(std::shared_ptr<Camera> cam) {
         camera = cam;

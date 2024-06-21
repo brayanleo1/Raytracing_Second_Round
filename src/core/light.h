@@ -21,6 +21,7 @@ enum class light_flag_e : int {
 class VisibilityTester {
 public:
     VisibilityTester()=default;
+    //p0 is the point of origin (or surface hitting point) and p1 is the point of destination (or light origin point).
     VisibilityTester( const Surfel& p0, const Surfel& p1) : p0{p0}, p1{p1} {};
     bool unoccluded( const Scene& scene );
 public:

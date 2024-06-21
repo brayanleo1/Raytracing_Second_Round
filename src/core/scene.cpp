@@ -24,4 +24,8 @@ bool Scene::have_ambient_light() const {
     return false;
 }
 
+Bounds3f Scene::world_bound() const {
+    return aggregate.get()->world_bounds();
+}
+
 } // namespace rt3

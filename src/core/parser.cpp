@@ -214,6 +214,7 @@ namespace rt3
             {param_type_e::STRING, "type"},
             {param_type_e::POINT3F, "from"},
             {param_type_e::COLOR, "I"},
+            {param_type_e::COLOR, "L"},
             {param_type_e::POINT3F, "to"},
             {param_type_e::POINT3F, "scale"},
             {param_type_e::REAL, "cutoff"},

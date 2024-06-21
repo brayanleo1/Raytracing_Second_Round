@@ -19,7 +19,7 @@ namespace rt3 {
 
 */
 std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& scene, int depth) const {
-    
+
     // [0] FIRST STEP TO INITIATE `L` WITH THE COLOR VALUE TO BE RETURNED.
     Spectrum L{0, 0, 0};
     
@@ -45,16 +45,17 @@ std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& s
     
     // [5] CALCULATE & ADD CONTRIBUTION FROM EACH LIGHT SOURCE
     for (const auto& light : scene.lights) {
+
         Vector3f wi;
         VisibilityTester vis;
         Spectrum Lig = light->sample_Li(surfel, &wi, &vis);
 
-        if (!vis.unoccluded(scene)) {
+        if (light->is_ambient()) {
+            L += material->get_ka() * Lig;
             continue;
         }
 
-        if (light->is_ambient()) {
-            L += material->get_ka() * Lig;
+        if (!vis.unoccluded(scene)) {
             continue;
         }
 
@@ -72,7 +73,7 @@ std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& s
         // Specular term
         float cos_alpha = dot(N, H);
         
-        if (cos_alpha > 0){
+        if (cos_alpha > 0 && material->get_glossiness() > 0 ){
             L += material->get_ks() * Lig * pow(cos_alpha, material->get_glossiness());
         }
         
@@ -80,8 +81,8 @@ std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& s
     
     
     // [7] ADD MIRROR REFLECTION CONTRIBUTION
-
-    if (depth > 0) {
+    
+    if (depth > 0 && material->get_km() > Spectrum{0,0,0}) {        
 
         Vector3f R = ray.direction() - 2 * dot(ray.direction(), N) * N;
         R.make_unit_vector();
@@ -89,9 +90,8 @@ std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& s
         auto [reflected_L, hit] = Li(reflected_ray, scene, depth-1);
         reflected_L = material->get_km() * reflected_L;
 
-        if(hit){
-            L += reflected_L;
-        }
+        L += reflected_L;
+        
     }
 
     return {L,true};
@@ -103,6 +103,12 @@ BlinnPhongIntegrator *create_blinn_phong_integrator(const ParamSet &ps, const st
     return new BlinnPhongIntegrator(cam, depth);
 }
 
+void BlinnPhongIntegrator::preprocess(const Scene &scene) const {
+    // Utilize the preprocess method of the light sources from the scene.
+    for (const auto& light : scene.lights) {
+        light->preprocess(scene);
+    }
+}
 
 
 } // namespace rt3

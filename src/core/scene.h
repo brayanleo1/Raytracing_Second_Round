@@ -28,6 +28,8 @@ class Scene {
         bool intersect_p( const Ray& r ) const;
 
         bool have_ambient_light() const;
+
+        Bounds3f world_bound() const;
 };
 Scene *create_scene(const std::shared_ptr<Primitive> &ag, const std::shared_ptr< Background > &bkg, std::vector<std::shared_ptr<Light>> lts);
 

@@ -11,7 +11,7 @@ namespace rt3 {
 class Shape {
     public:
         ~Shape(){};
-        Bounds3f world_bounds() {return Bounds3f();};
+        virtual Bounds3f world_bounds() const = 0;
         virtual bool intersect( const Ray& r, Surfel *sf ) const = 0;
         // Simpler & faster version of intersection that only return true/false.
         // It does not compute the hit point information.

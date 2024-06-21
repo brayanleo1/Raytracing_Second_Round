@@ -15,6 +15,7 @@ bool Sphere::intersect(const Ray& r, Surfel* sf) const {
 
   if (discriminant > 0) {
     float t = (-b - sqrt(discriminant)) / (2.0 * a);
+
     if (t > 0 && t < r.t_max) {
       r.t_max = t;
       sf->p = r.origin() + t * r.direction();

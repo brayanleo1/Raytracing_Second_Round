@@ -33,44 +33,14 @@ constexpr RGBAColor black{0,0,0,255};
 constexpr RGBAColor none{0,0,0,0};
 
 
-
-inline RGBAColor operator*(float t, const RGBAColor &v)
-{	
-    return RGBAColor{ static_cast<unsigned char>(t * v.r), static_cast<unsigned char>(t * v.g), static_cast<unsigned char>(t * v.b), v.a};
-}
-
-inline RGBAColor operator*(const RGBAColor &v, float t)
+inline bool operator>(const RGBAColor &v1, const RGBAColor &v2)
 {
-	return t * v;
+	return v1.r > v2.r || v1.g > v2.g || v1.b > v2.b;
 }
 
-inline RGBAColor operator*(const RGBAColor &v1, const Spectrum &s) {
-	return RGBAColor{ static_cast<unsigned char>(v1.r * s.r(), static_cast<unsigned char>(v1.g * s.g(), static_cast<unsigned char>(v1.b * s.b()), v1.a))};
-}
-
-inline RGBAColor operator*(const Spectrum &s, const RGBAColor &v1) {
-	return v1 * s;
-}
-
-inline RGBAColor operator+(const RGBAColor &v1, const RGBAColor &v2)
+inline bool operator>(const Spectrum &s1, const Spectrum &s2)
 {
-	return RGBAColor{ static_cast<unsigned char>(v1.r + v2.r), static_cast<unsigned char>(v1.g + v2.g), static_cast<unsigned char>(v1.b + v2.b), v1.a};
-}
-
-inline RGBAColor operator+=(RGBAColor &v1, const RGBAColor &v2)
-{
-	v1.r += v2.r;
-	v1.g += v2.g;
-	v1.b += v2.b;
-	return v1;
-}
-
-inline RGBAColor operator+=(RGBAColor &v1, const Spectrum &s)
-{
-	v1.r += s.r()*255;
-	v1.g += s.g()*255;
-	v1.b += s.b()*255;
-	return v1;
+	return s1.r() > s2.r() || s1.g() > s2.g() || s1.b() > s2.b();
 }
 
 } // namespace rt3

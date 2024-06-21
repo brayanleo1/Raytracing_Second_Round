@@ -22,7 +22,7 @@ class SamplerIntegrator : public Integrator {
 
 		virtual RGBAColor Li( const Ray& ray, const std::unique_ptr<Scene>& scene ) const = 0;
 		virtual void render( const std::unique_ptr<Scene>& scene );
-        //virtual void preprocess(const Scene &scene) const;
+        virtual void preprocess(const Scene &scene) const = 0;
 
     protected:
 		std::shared_ptr<Camera> camera;
