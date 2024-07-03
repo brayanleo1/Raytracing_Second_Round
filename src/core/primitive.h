@@ -39,15 +39,15 @@ class PrimitiveAggregate : public Primitive {
 		PrimitiveAggregate(std::vector<std::shared_ptr<Primitive>> primitives): primitives{primitives} {}
 		Bounds3f world_bounds() const override;
 		Bounds3f union_bounds(const Bounds3f &b1, const Bounds3f &b2) const;
-		Point3f min(const Point3f &p1, const Point3f &p2) const;
-		Point3f max(const Point3f &p1, const Point3f &p2) const;
 		bool intersect ( const Ray& r, Surfel *sf ) const override;
 		bool intersect_p ( const Ray& r) const override;
 		const std::shared_ptr<Material> get_material(void) const override {return nullptr;}
+		std::vector<std::shared_ptr<Primitive>> get_primitives(void) const {return primitives;}
 	private:
 		std::vector<std::shared_ptr<Primitive>> primitives;
 	};
 
+Primitive *create_primitive(const ParamSet &ps, const std::shared_ptr<Material> &mtr);
 PrimitiveAggregate *create_primitive_aggregate(const std::vector<std::shared_ptr<Primitive>> &primitives);
 GeometricPrimitive *create_geometric_primitive(const ParamSet &ps, const std::shared_ptr<Material> &mtr);
 }

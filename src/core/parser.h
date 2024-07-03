@@ -91,7 +91,8 @@ namespace rt3 {
         ARR_VEC3I,     //!< An array of Vector3i
         ARR_POINT3F,   //!< An array of Point3f
         ARR_COLOR,     //!< An array of Color
-        ARR_NORMAL3F   //!< An array of Normal3f
+        ARR_NORMAL3F,   //!< An array of Normal3f
+        ARR_POINT2F   //!< An array of Point2f
     };
     // === parsing functions.
     void parse( const char* );

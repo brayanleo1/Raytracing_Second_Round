@@ -4,6 +4,10 @@
 #include "primitive.h"
 #include "blinnPhongMaterial.h"
 
+#include <iostream>
+#include <thread>
+#include <chrono>
+
 namespace rt3 {
 
 /*
@@ -41,7 +45,6 @@ std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& s
 
     Vector3f N = surfel.n;
     Vector3f V = -ray.direction();
-
     
     // [5] CALCULATE & ADD CONTRIBUTION FROM EACH LIGHT SOURCE
     for (const auto& light : scene.lights) {
@@ -54,6 +57,7 @@ std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& s
             L += material->get_ka() * Lig;
             continue;
         }
+
 
         if (!vis.unoccluded(scene)) {
             continue;
@@ -73,7 +77,7 @@ std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& s
         // Specular term
         float cos_alpha = dot(N, H);
         
-        if (cos_alpha > 0 && material->get_glossiness() > 0 ){
+        if (cos_alpha > 0 && material->get_glossiness() > 0){
             L += material->get_ks() * Lig * pow(cos_alpha, material->get_glossiness());
         }
         
@@ -91,7 +95,6 @@ std::pair<Spectrum,bool> BlinnPhongIntegrator::Li(const Ray& ray, const Scene& s
         reflected_L = material->get_km() * reflected_L;
 
         L += reflected_L;
-        
     }
 
     return {L,true};

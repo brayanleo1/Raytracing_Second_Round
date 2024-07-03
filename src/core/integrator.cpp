@@ -13,12 +13,11 @@ namespace rt3 {
     auto w = camera->film->get_resolution()[0];
     auto h = camera->film->get_resolution()[1];
 
-    // Loading bar for the rendering process.
-    std::cout << "initializing rendering main loop" << std::endl;
-
+    std::cout << "Loading scene" << std::endl;
+    
     // Traverse all pixels to shoot rays from.
     for ( int j = 0 ; j < h ; j++ ) {
-        std::cout << "Rendering line " << j+1 << " of " << h << std::endl;
+        std::cout << "Loading "<<j+1 << " of " << h << std::endl;
         for( int i = 0 ; i < w ; i++ ) {
             Ray ray = camera->generate_ray( i, j );
             auto colorDef = scene.get()->background.get()->sample( float(i)/float(w), float(j)/float(h) );

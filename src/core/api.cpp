@@ -1,12 +1,12 @@
 #include "api.h"
 #include "background.h"
 #include "camera.h"
-#include "sphere.h"
-#include "material.h"
-#include "scene.h"
+#include "triangle.h"
 
 #include <chrono>
 #include <memory>
+
+#include <fstream>
 
 namespace rt3 {
 
@@ -59,7 +59,9 @@ Material *API::make_material(const std::string &name, const ParamSet &ps) {
 Primitive *API::make_primitive(const std::string &name, const ParamSet &ps, std::shared_ptr<Material>& mtr) {
   std::cout << ">>> Inside API::make_primitive()\n";
   Primitive *pm{nullptr};
-  pm = create_geometric_primitive(ps, mtr);//create_primitive(ps, mtr);
+  pm = create_primitive(ps, mtr); //Actually, this will be create_primitive(ps, mtr);
+  
+  
 
   // Return the newly created primitive.
   return pm;
@@ -169,13 +171,23 @@ void API::world_end() {
     render_opt->materials_list.push_back(the_material);
   }
 
+  //Add primitives
   for(long unsigned int i = 0; i < render_opt->primitives_ps.size(); i++)
-  {
-    std::shared_ptr<Primitive> the_primitives{
-      make_primitive(render_opt->primitives_type[i], render_opt->primitives_ps[i], render_opt->materials_list[render_opt->material_index[i]])};
-    render_opt->primitives_list.push_back(the_primitives);
-  }
+ {
+   std::shared_ptr<Primitive> the_primitives{
+     make_primitive(render_opt->primitives_type[i], render_opt->primitives_ps[i], render_opt->materials_list[render_opt->material_index[i]])};
+   if(render_opt->primitives_type[i] == "trianglemesh") {
+     const PrimitiveAggregate* pg = dynamic_cast<const PrimitiveAggregate*>(the_primitives.get());
+     auto q = pg->get_primitives(); //PrimitiveAggregate
+     for(long unsigned int j = 0; j < q.size(); j++) {
+       render_opt->primitives_list.push_back(q[j]);
+     }
+   } else {
+     render_opt->primitives_list.push_back(the_primitives);
+   }
+ }
 
+  //Add lights
   for(long unsigned int i = 0; i < render_opt->light_ps.size(); i++)
   {
     std::shared_ptr<Light> the_light{
@@ -219,6 +231,13 @@ void API::world_end() {
                 std::to_string(
                     std::chrono::duration<double, std::milli>(diff).count()) +
                 " ms) \n");
+
+    // Log the time elapsed in the render process on a file. If there is more than one, then append.
+    std::ofstream log_file;
+    log_file.open("render_log.txt", std::ios_base::app);
+    log_file << "Time elapsed: " << diff_sec.count() << " seconds ("
+             << std::chrono::duration<double, std::milli>(diff).count() << " ms) \n";
+    log_file.close();
   }
   // [4] Basic clean up
   curr_state = APIState::SetupBlock; // correct machine state.

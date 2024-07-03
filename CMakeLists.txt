@@ -56,13 +56,15 @@ add_executable(basic_rt3 ${RT3_SOURCE_DIR}/core/ambientLight.cpp
                          ${RT3_SOURCE_DIR}/core/material.cpp
                          ${RT3_SOURCE_DIR}/core/parser.cpp
                          ${RT3_SOURCE_DIR}/core/pointLight.cpp
+                         ${RT3_SOURCE_DIR}/core/primitive.cpp
                          ${RT3_SOURCE_DIR}/core/primitiveAggregate.cpp
                          ${RT3_SOURCE_DIR}/core/scene.cpp
                          ${RT3_SOURCE_DIR}/core/shape.cpp
                          ${RT3_SOURCE_DIR}/core/sphere.cpp
                          ${RT3_SOURCE_DIR}/core/spotLight.cpp
-                         #${RT3_SOURCE_DIR}/core/triangle.cpp
+                         ${RT3_SOURCE_DIR}/core/triangle.cpp
                          ${RT3_SOURCE_DIR}/ext/lodepng.cpp
+                         ${RT3_SOURCE_DIR}/ext/tiny_obj_loader.cc
                          ${RT3_SOURCE_DIR}/ext/tinyxml2.cpp
                          ${RT3_SOURCE_DIR}/main/rt3.cpp
                         )
